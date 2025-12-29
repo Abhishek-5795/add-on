@@ -25,6 +25,10 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.html$/,
+        use: 'html-loader'
       }
     ]
   },
@@ -32,11 +36,13 @@ module.exports = {
     extensions: ['.js', '.jsx']
   },
   plugins: [
-    new GasPlugin(),
     new HtmlWebpackPlugin({
       template: './src/client/index.html',
       filename: 'index.html',
-      inject: false
-    })
+      inject: 'body',
+      scriptLoading: 'defer',
+      templateParameters: false
+    }),
+    new GasPlugin()
   ]
 };
