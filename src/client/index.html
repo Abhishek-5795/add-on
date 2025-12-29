@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Roboto', 'Arial', sans-serif;
+      font-size: 14px;
+      color: #202124;
+      background-color: #fff;
+      padding: 16px;
+    }
+    
+    .container {
+      max-width: 100%;
+    }
+    
+    .section {
+      margin-bottom: 20px;
+      padding: 16px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e8eaed;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #1967d2;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .status-success {
+      background-color: #34a853;
+    }
+    
+    .status-error {
+      background-color: #ea4335;
+    }
+    
+    .status-pending {
+      background-color: #fbbc04;
+    }
+    
+    .status-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    
+    .label {
+      font-weight: 500;
+      color: #5f6368;
+      min-width: 80px;
+    }
+    
+    .value {
+      color: #202124;
+      word-break: break-word;
+    }
+    
+    .error-list {
+      margin-top: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .error-item {
+      padding: 8px;
+      margin-bottom: 8px;
+      background-color: #fce8e6;
+      border-left: 3px solid #ea4335;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    
+    .error-time {
+      font-size: 11px;
+      color: #5f6368;
+      margin-bottom: 4px;
+    }
+    
+    .error-message {
+      color: #d93025;
+      font-weight: 500;
+    }
+    
+    .button {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #1967d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      transition: background-color 0.2s;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+    
+    .button:hover {
+      background-color: #1557b0;
+    }
+    
+    .button:active {
+      background-color: #0d47a1;
+    }
+    
+    .button-secondary {
+      background-color: #fff;
+      color: #1967d2;
+      border: 1px solid #dadce0;
+    }
+    
+    .button-secondary:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .empty-state {
+      text-align: center;
+      color: #5f6368;
+      padding: 20px;
+      font-size: 13px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #5f6368;
+    }
+    
+    .config-item {
+      margin-bottom: 12px;
+    }
+    
+    .config-label {
+      font-weight: 500;
+      color: #5f6368;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    
+    .config-value {
+      color: #202124;
+      font-size: 13px;
+      padding: 4px 0;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background-color: #e8f0fe;
+      color: #1967d2;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <!-- React will be injected here by webpack -->
+  <script src="client.bundle.js"></script>
+</body>
+</html>

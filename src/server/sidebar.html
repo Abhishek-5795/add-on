@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <?!= include('styles'); ?>
+</head>
+<body>
+  <div id="app" class="container">
+    <div class="loading">Loading status...</div>
+  </div>
+  
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    
+    function Sidebar() {
+      const [status, setStatus] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+
+      useEffect(() => {
+        loadStatus();
+        const interval = setInterval(loadStatus, 10000);
+        return () => clearInterval(interval);
+      }, []);
+
+      const loadStatus = () => {
+        setLoading(true);
+        setError(null);
+        
+        google.script.run
+          .withSuccessHandler((result) => {
+            if (result.success) {
+              setStatus(result);
+              setError(null);
+            } else {
+              setError(result.error);
+            }
+            setLoading(false);
+          })
+          .withFailureHandler((error) => {
+            setError(error.message);
+            setLoading(false);
+          })
+          .getStatus();
+      };
+
+      const handleClearErrors = () => {
+        google.script.run
+          .withSuccessHandler((result) => {
+            if (result.success) {
+              loadStatus();
+            }
+          })
+          .withFailureHandler((error) => {
+            setError(error.message);
+          })
+          .clearErrorHistoryFromSidebar();
+      };
+
+      const formatTimestamp = (timestamp) => {
+        if (!timestamp) return 'N/A';
+        try {
+          return new Date(timestamp).toLocaleString();
+        } catch (e) {
+          return timestamp;
+        }
+      };
+
+      if (loading && !status) {
+        return <div className="loading">Loading status...</div>;
+      }
+
+      if (error) {
+        return (
+          <div className="container">
+            <div className="section error-item">
+              <div className="section-title">Error</div>
+              <div className="error-message">{error}</div>
+              <button className="button" onClick={loadStatus}>Retry</button>
+            </div>
+          </div>
+        );
+      }
+
+      if (!status) return null;
+
+      const { lastSync, errorHistory, config } = status;
+      
+      let statusClass = 'status-pending';
+      let statusText = 'No sync yet';
+      
+      if (lastSync) {
+        if (lastSync.status === 'success') {
+          statusClass = 'status-success';
+          statusText = 'Success';
+        } else if (lastSync.status === 'error') {
+          statusClass = 'status-error';
+          statusText = 'Error';
+        }
+      }
+
+      return (
+        <div className="container">
+          <div className="section">
+            <div className="section-title">Last Sync Status</div>
+            
+            <div className="status-row">
+              <span className={`status-indicator ${statusClass}`}></span>
+              <span className="value">{statusText}</span>
+            </div>
+            
+            {lastSync && (
+              <>
+                <div className="status-row">
+                  <span className="label">Timestamp:</span>
+                  <span className="value">{formatTimestamp(lastSync.timestamp)}</span>
+                </div>
+                
+                {lastSync.operationType && (
+                  <div className="status-row">
+                    <span className="label">Operation:</span>
+                    <span className="value">{lastSync.operationType}</span>
+                  </div>
+                )}
+                
+                {lastSync.rowNumber && (
+                  <div className="status-row">
+                    <span className="label">Row:</span>
+                    <span className="value">{lastSync.rowNumber}</span>
+                  </div>
+                )}
+                
+                {lastSync.error && (
+                  <div className="status-row">
+                    <span className="label">Error:</span>
+                    <span className="value" style={{color: '#d93025'}}>{lastSync.error}</span>
+                  </div>
+                )}
+              </>
+            )}
+            
+            {!lastSync && (
+              <div className="empty-state">
+                No webhook calls yet. Edit a monitored column to trigger a sync.
+              </div>
+            )}
+          </div>
+
+          <div className="section">
+            <div className="section-title">Configuration</div>
+            
+            <div className="config-item">
+              <div className="config-label">Webhook URL:</div>
+              <div className="config-value">{config?.webhookUrl || 'Not configured'}</div>
+            </div>
+            
+            <div className="config-item">
+              <div className="config-label">Monitored Columns:</div>
+              <div className="config-value">
+                {config?.triggerColumns && config.triggerColumns.length > 0 ? (
+                  config.triggerColumns.map((col, idx) => (
+                    <span key={idx} className="badge">{col}</span>
+                  ))
+                ) : (
+                  <span>None</span>
+                )}
+              </div>
+            </div>
+            
+            <div className="config-item">
+              <div className="config-label">Debounce Delay:</div>
+              <div className="config-value">
+                {config?.debounceDelay ? `${config.debounceDelay}ms` : 'N/A'}
+              </div>
+            </div>
+          </div>
+
+          {errorHistory && errorHistory.length > 0 && (
+            <div className="section">
+              <div className="section-title">Error History ({errorHistory.length})</div>
+              
+              <div className="error-list">
+                {errorHistory.map((error, idx) => (
+                  <div key={idx} className="error-item">
+                    <div className="error-time">{formatTimestamp(error.timestamp)}</div>
+                    <div className="error-message">{error.message}</div>
+                  </div>
+                ))}
+              </div>
+              
+              <button className="button button-secondary" onClick={handleClearErrors}>
+                Clear Error History
+              </button>
+            </div>
+          )}
+
+          <div className="section">
+            <button className="button" onClick={loadStatus}>Refresh Status</button>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<Sidebar />, document.getElementById('app'));
+  </script>
+</body>
+</html>
