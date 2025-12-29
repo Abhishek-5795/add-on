@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import Sidebar from './components/Sidebar';
 import Settings from './components/Settings';
 
@@ -19,9 +19,10 @@ const App = () => {
   return <Sidebar />;
 };
 
-// Render the app when DOM is ready
+// Render the app when DOM is ready (React 18 style)
 document.addEventListener('DOMContentLoaded', () => {
-  ReactDOM.render(<App />, document.getElementById('root'));
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(<App />);
 });
 
 export default App;

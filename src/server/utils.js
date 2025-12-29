@@ -91,12 +91,13 @@ function validateData(data) {
 
 /**
  * Sanitize data to prevent XSS and injection attacks
+ * Strategy: Remove dangerous content and encode remaining special characters
  * @param {*} value - Value to sanitize
  * @returns {*} Sanitized value
  */
 function sanitizeValue(value) {
   if (typeof value === 'string') {
-    // Remove HTML tags, script tags, and potentially dangerous content
+    // Step 1: Remove script tags and dangerous content
     let sanitized = value
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
       .replace(/<[^>]*>/g, '') // Remove all HTML tags
@@ -104,10 +105,11 @@ function sanitizeValue(value) {
       .replace(/on\w+\s*=/gi, '') // Remove event handlers like onclick=
       .trim();
     
-    // Additional safety: encode special characters if they remain
+    // Step 2: Encode special characters for additional safety
+    // Using HTML entities for quotes to maintain readability in webhook payloads
     sanitized = sanitized
       .replace(/[<>]/g, '') // Remove any remaining angle brackets
-      .replace(/['"]/g, match => match === '"' ? '&quot;' : '&#39;'); // Encode quotes
+      .replace(/['"]/g, match => match === '"' ? '&quot;' : '&#39;'); // Encode quotes as entities
     
     return sanitized;
   }

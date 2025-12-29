@@ -82,7 +82,14 @@ function detectNewRows() {
       
       const sheetName = sheet.getName();
       // Use base64 encoding to safely encode sheet name in key
-      const encodedSheetName = Utilities.base64Encode(sheetName);
+      // Handle encoding errors gracefully
+      let encodedSheetName;
+      try {
+        encodedSheetName = Utilities.base64Encode(sheetName);
+      } catch (e) {
+        // Fallback: use sanitized sheet name if encoding fails
+        encodedSheetName = sheetName.replace(/[^a-zA-Z0-9]/g, '_');
+      }
       const processedKey = `processed_${encodedSheetName}_${lastRow}`;
       
       // Check if this row has already been processed
