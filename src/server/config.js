@@ -4,6 +4,8 @@
  */
 
 // Default configuration values
+// Note: This is intentionally duplicated in src/shared/constants.js for reference.
+// Google Apps Script doesn't support ES6 imports, so each file defines its own constants.
 const DEFAULT_CONFIG = {
   webhookUrl: 'https://example.com/webhook',
   triggerColumns: ['phoneNumber'],

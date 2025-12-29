@@ -81,7 +81,9 @@ function detectNewRows() {
       }
       
       const sheetName = sheet.getName();
-      const processedKey = `processed_${sheetName}_${lastRow}`;
+      // Use base64 encoding to safely encode sheet name in key
+      const encodedSheetName = Utilities.base64Encode(sheetName);
+      const processedKey = `processed_${encodedSheetName}_${lastRow}`;
       
       // Check if this row has already been processed
       const props = PropertiesService.getScriptProperties();
@@ -171,22 +173,31 @@ function addPendingChange(changeData) {
  */
 function scheduleDebounceProcessing() {
   try {
-    // Delete existing trigger if any
-    const triggers = ScriptApp.getProjectTriggers();
-    triggers.forEach(trigger => {
-      if (trigger.getHandlerFunction() === 'processPendingChanges') {
-        ScriptApp.deleteTrigger(trigger);
+    const props = PropertiesService.getScriptProperties();
+    const existingTriggerId = props.getProperty('debounceTrigger');
+    
+    // Delete existing trigger if any using stored ID
+    if (existingTriggerId) {
+      const triggers = ScriptApp.getProjectTriggers();
+      for (let i = 0; i < triggers.length; i++) {
+        if (triggers[i].getUniqueId() === existingTriggerId) {
+          ScriptApp.deleteTrigger(triggers[i]);
+          break; // Exit loop once found
+        }
       }
-    });
+    }
     
     // Create new trigger with debounce delay
     const debounceDelay = getConfig('debounceDelay') || 5000;
     const triggerTime = new Date(Date.now() + debounceDelay);
     
-    ScriptApp.newTrigger('processPendingChanges')
+    const trigger = ScriptApp.newTrigger('processPendingChanges')
       .timeBased()
       .at(triggerTime)
       .create();
+    
+    // Store trigger ID for efficient deletion
+    props.setProperty('debounceTrigger', trigger.getUniqueId());
     
     Logger.log(`Scheduled processing at ${triggerTime.toISOString()}`);
     
@@ -248,13 +259,18 @@ function processPendingChanges() {
     // Clear pending changes
     props.setProperty('pendingChanges', JSON.stringify({}));
     
-    // Clean up trigger
-    const triggers = ScriptApp.getProjectTriggers();
-    triggers.forEach(trigger => {
-      if (trigger.getHandlerFunction() === 'processPendingChanges') {
-        ScriptApp.deleteTrigger(trigger);
+    // Clean up trigger using stored ID
+    const triggerId = props.getProperty('debounceTrigger');
+    if (triggerId) {
+      const triggers = ScriptApp.getProjectTriggers();
+      for (let i = 0; i < triggers.length; i++) {
+        if (triggers[i].getUniqueId() === triggerId) {
+          ScriptApp.deleteTrigger(triggers[i]);
+          break;
+        }
       }
-    });
+      props.deleteProperty('debounceTrigger');
+    }
     
   } catch (error) {
     Logger.log(`Error processing pending changes: ${error.message}`);

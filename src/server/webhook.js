@@ -107,7 +107,9 @@ function sendToWebhook(payload) {
     
     // Wait before retry (except after last attempt)
     if (attempt < retryAttempts) {
-      const delay = retryDelays[attempt - 1] || retryDelays[retryDelays.length - 1];
+      // Use the delay for this attempt, or the last delay if out of bounds
+      const delayIndex = Math.min(attempt - 1, retryDelays.length - 1);
+      const delay = retryDelays[delayIndex];
       Logger.log(`Waiting ${delay}ms before retry...`);
       Utilities.sleep(delay);
     }

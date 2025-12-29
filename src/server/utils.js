@@ -96,8 +96,20 @@ function validateData(data) {
  */
 function sanitizeValue(value) {
   if (typeof value === 'string') {
-    // Remove any HTML tags and trim
-    return value.replace(/<[^>]*>/g, '').trim();
+    // Remove HTML tags, script tags, and potentially dangerous content
+    let sanitized = value
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+      .replace(/<[^>]*>/g, '') // Remove all HTML tags
+      .replace(/javascript:/gi, '') // Remove javascript: URLs
+      .replace(/on\w+\s*=/gi, '') // Remove event handlers like onclick=
+      .trim();
+    
+    // Additional safety: encode special characters if they remain
+    sanitized = sanitized
+      .replace(/[<>]/g, '') // Remove any remaining angle brackets
+      .replace(/['"]/g, match => match === '"' ? '&quot;' : '&#39;'); // Encode quotes
+    
+    return sanitized;
   }
   return value;
 }
