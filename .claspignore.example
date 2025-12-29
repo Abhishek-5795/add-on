@@ -1,0 +1,27 @@
+# Ignore client-side React files (we use inline React in HTML)
+src/client/**
+
+# Ignore webpack and build files
+webpack.config.js
+node_modules/**
+package.json
+package-lock.json
+dist/**
+build/**
+
+# Ignore documentation
+README.md
+EXAMPLES.md
+.gitignore
+
+# Ignore IDE files
+.vscode/**
+.idea/**
+*.swp
+
+# Ignore clasp config
+.clasp.json
+.clasp.json.example
+
+# Only push server-side files
+!src/server/**
